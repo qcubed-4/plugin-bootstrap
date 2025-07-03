@@ -1,5 +1,5 @@
 {
-    "name": "qcubed-4/bootstrap",
+    "name": "qcubed-4/plugin-bootstrap",
     "description": "QCubed-4 wrappers for Twitter Bootstrap. Specifically for QCubed v4 and above.",
     "type": "qcubed-library",
     "keywords": ["qcubed-4", "bootstrap"],
