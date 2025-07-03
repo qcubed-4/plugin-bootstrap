@@ -5,7 +5,7 @@ QCubed-4 plugin to simplify the integration of Twitter Bootstrap
 1) Install both the plugin and twitter bootstrap using Composer. Execute the following on the command line from your main
 install directory:
 ```
-	composer require qcubed-4/bootstrap
+	composer require qcubed-4/plugin-bootstrap
 	composer require twbs/bootstrap v3.3.7
 ```    
 2) Next, you might want to alter some of the settings in the bootstrap.cfg.php file. Look for that
