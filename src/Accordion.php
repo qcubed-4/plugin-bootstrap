@@ -13,9 +13,10 @@ use QCubed\Control\ControlBase;
 use QCubed\Control\FormBase;
 use QCubed\Control\DataRepeater;
 use QCubed\Exception\Caller;
+use QCubed\Exception\InvalidCast;
+use Throwable;
 use QCubed\Html;
 use QCubed\Type;
-use QCubed as Q;
 
 /**
  * Accordion class
@@ -32,9 +33,9 @@ use QCubed as Q;
 
 class Accordion extends DataRepeater
 {
-    const RENDER_HEADER = 'header';
-    const RENDER_BODY = 'body';
-    const RENDER_FOOTER = 'footer';
+    const string RENDER_HEADER = 'header';
+    const string RENDER_BODY = 'body';
+    const string RENDER_FOOTER = 'footer';
 
     protected string $strCssClass = Bootstrap::PANEL_GROUP;
     protected int $intCurrentOpenItem = 0;
@@ -48,6 +49,7 @@ class Accordion extends DataRepeater
      * @param string|null $strControlId Optional control ID.
      *
      * @return void
+     * @throws Caller
      */
     public function __construct(ControlBase|FormBase $objParent, ?string $strControlId = null)
     {
@@ -72,7 +74,7 @@ class Accordion extends DataRepeater
     }
 
     /**
-     * Callback from the standard template to render the header html. Calls the callback. The call callback should
+     * Callback from the standard template to render the header HTML. Calls the callback. The call callback should
      * call the RenderToggleHelper to render the toggling portion of the header.
      *
      * @param mixed $objItem
@@ -118,8 +120,8 @@ class Accordion extends DataRepeater
     }
 
     /**
-     * Renders the given html with an anchor wrapper that will make it toggle the currently drawn item. This should be called
-     * from your drawing callback when drawing the heading. This could span the entire heading, or just a portion.
+     * Renders the given HTML with an anchor wrapper that will make it toggle the currently drawn item. This should be called
+     * from your drawing callback when drawing the heading. This could span the entire heading or just a portion.
      *
      * @param string $strHtml
      * @param bool $blnRenderOutput
@@ -155,7 +157,7 @@ class Accordion extends DataRepeater
 
     /**
      * Handles the dynamic setting of properties on the object.
-     * This method processes specific property names and assigns values to them,
+     * This method processes specific property names and assigns values to them
      * or delegates the assignment to the parent method if the property does not match.
      * If an invalid property is accessed, an exception is thrown with an adjusted stack trace.
      *
@@ -163,6 +165,9 @@ class Accordion extends DataRepeater
      * @param mixed $mixValue The value to assign to the property.
      *
      * @return void
+     * @throws Caller
+     * @throws InvalidCast
+     * @throws Throwable
      */
     public function __set(string $strName, mixed $mixValue): void
     {

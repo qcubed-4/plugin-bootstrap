@@ -24,8 +24,8 @@ use QCubed\Type;
  * @package QCubed\Bootstrap
  */
 class CarouselItem extends HListItem {
-    protected $strImageUrl;
-    protected $strAltText;
+    protected string $strImageUrl;
+    protected ?string $strAltText;
 
     /**
      * Constructor method for initializing the object.
@@ -34,7 +34,7 @@ class CarouselItem extends HListItem {
      * @param string|null $strAltText Optional alternative text for the image. Default is null.
      * @param string $strText The text content of the object. Default is an empty string.
      * @param mixed $strAnchor The anchor value associated with the text. Default is null.
-     * @param string|null $strId Optional identifier for the object. Default is null.
+     * @param string|null $strId An optional identifier for the object. Default is null.
      *
      * @return void
      */
@@ -47,21 +47,21 @@ class CarouselItem extends HListItem {
     /**
      * Magic method to retrieve the value of a property.
      *
-     * @param string $strText The name of the property to retrieve.
+     * @param string $strName The name of the property to retrieve.
      *
      * @return mixed The value of the requested property, or the value from the parent class if not explicitly handled.
      *
      * @throws Caller If the property does not exist or is inaccessible, an exception is thrown.
      */
-    public function __get(string $strText): mixed
+    public function __get(string $strName): mixed
     {
-        switch ($strText) {
+        switch ($strName) {
             case "ImageUrl": return $this->strImageUrl;
             case "AltText": return $this->strAltText;
 
             default:
                 try {
-                    return parent::__get($strText);
+                    return parent::__get($strName);
                 } catch (Caller $objExc) {
                     $objExc->incrementOffset();
                     throw $objExc;
@@ -72,7 +72,7 @@ class CarouselItem extends HListItem {
     /**
      * Magic method for setting the value of a property dynamically.
      *
-     * @param string $strText The name of the property to set.
+     * @param string $strName The name of the property to set.
      * @param mixed $mixValue The value to assign to the property.
      *
      * @return void
@@ -80,9 +80,9 @@ class CarouselItem extends HListItem {
      * @throws InvalidCast If the value cannot be cast to the required type.
      * @throws Caller If the parent::__set method encounters an error.
      */
-    public function __set(string $strText, mixed $mixValue): void
+    public function __set(string $strName, mixed $mixValue): void
     {
-        switch ($strText) {
+        switch ($strName) {
             case "ImageUrl":
                 try {
                     $this->strImageUrl = Type::cast($mixValue, Type::STRING);
@@ -103,7 +103,7 @@ class CarouselItem extends HListItem {
 
             default:
                 try {
-                    parent::__set($strText, $mixValue);
+                    parent::__set($strName, $mixValue);
                 } catch (Caller $objExc) {
                     $objExc->incrementOffset();
                     throw $objExc;

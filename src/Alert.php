@@ -26,13 +26,13 @@ use QCubed\Type;
  * button that automatically hides the alert.
  *
  * Per Bootstraps documentation, you MUST specify an alert type class. Do this by using AddCssClass, or the CssClass
- * Attribute with a plus in front of the class. For example:
- * 	$objAlert->CssClass = '+' . Bootstrap::AlertSuccess;
+ * Attribute with a plus in front of the class. For example,
+ * 	$objAlert->CssClass = '+'. Bootstrap::AlertSuccess;
  *
  * Use Display or Visible to show or hide the alert as needed. Or, set the
  * Dismissable attribute.
  *
- * Since its a \QCubed\Control\Panel, you can put text, template or child controls in it.
+ * Since it's a \QCubed\Control\Panel, you can put text, template or child controls in it.
  *
  * By default, alerts will fade on close. Remove the fade class if you want to turn this off.
  *
@@ -46,11 +46,17 @@ class Alert extends Panel
     protected ?bool $blnDismissable = false;
 
     /**
-     * Alert constructor.
-     * @param ControlBase|FormBase $objParent
-     * @param null $strControlId
+     * Initializes a new instance of the class, setting its parent control or form
+     * and optionally assigning a control ID. Additionally, configures the element
+     * with a default "alert" role and loads Bootstrap JavaScript dependencies.
+     *
+     * @param ControlBase|FormBase $objParent The parent control or form to which this control belongs.
+     * @param string|null $strControlId An optional ID for the control. If null, an ID will be automatically generated.
+     *
+     * @return void
+     * @throws Caller
      */
-    public function __construct(ControlBase|FormBase$objParent, ?string $strControlId = null)
+    public function __construct(ControlBase|FormBase $objParent, ?string $strControlId = null)
     {
         parent::__construct ($objParent, $strControlId);
 
@@ -94,12 +100,12 @@ class Alert extends Panel
         parent::makeJqWidget();
         if ($this->blnDismissable) {
             Application::executeControlCommand($this->ControlId, 'on', 'closed.bs.alert',
-                new Js\Closure("qcubed.recordControlModification ('{$this->ControlId}', '_Visible', false)"), ApplicationBase::PRIORITY_HIGH);
+                new Js\Closure("qcubed.recordControlModification ('$this->ControlId', '_Visible', false)"), ApplicationBase::PRIORITY_HIGH);
         }
     }
 
     /**
-     * Closes the alert using the Bootstrap javascript mechanism to close it. Removes the alert from the DOM.
+     * Closes the alert using the Bootstrap JavaScript mechanism to close it. Removes the alert from the DOM.
      * Bootstrap has no mechanism for showing it again, so you will need
      * to redraw the control to show it.
      *
@@ -170,7 +176,7 @@ class Alert extends Panel
                 }
                 break;
 
-            case '_Visible':	// Private attribute to record the visible state of the alert
+            case '_Visible': // A private attribute to record the visible state of the alert
                 $this->blnVisible = $mixValue;
                 break;
 

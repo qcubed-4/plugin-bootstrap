@@ -9,7 +9,7 @@
 
 namespace QCubed\Bootstrap;
 
-use QCubed as Q;
+use QCubed\Exception\Caller;
 use QCubed\Project\Control\ControlBase;
 use QCubed\Project\Control\FormBase;
 
@@ -24,8 +24,8 @@ use QCubed\Project\Control\FormBase;
  *
  * The following properties come from the trait
  *
- * @property-write string $LabelCssClass Css class for the label
- * @property-write string $HorizontalClass Css class to use for horizontal display
+ * @property-write string $LabelCssClass CSS class for the label
+ * @property-write string $HorizontalClass CSS class to use for horizontal display
  *
  *
  *
@@ -42,6 +42,7 @@ abstract class Control extends ControlBase
      * @param string|null $strControlId Optional control ID. If null, a unique ID is automatically generated.
      *
      * @return void
+     * @throws Caller
      */
     public function __construct(ControlBase|FormBase $objParent, ?string $strControlId = null)
     {

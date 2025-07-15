@@ -3,12 +3,22 @@ require_once(__DIR__ . '/qcubed.inc.php');
 
 use QCubed\Bootstrap as Bs;
 use QCubed\Control\RadioButtonList;
-use QCubed\Html;
+    use QCubed\Exception\Caller;
+    use QCubed\Exception\InvalidCast;
+    use QCubed\Html;
 use QCubed\Project\Control\FormBase as QForm;
 use QCubed\QString;
 use QCubed\Query\QQ;
 
-class SampleForm extends QForm
+
+    /**
+     * Represents a sample form for a QCubed application with various UI components.
+     *
+     * This form integrates multiple Bootstrap components, including a navigation bar,
+     * carousel, accordion, radio lists, and dropdown menus, to create an interactive
+     * and visually appealing user interface.
+     */
+    class SampleForm extends QForm
 {
     protected Bs\Navbar $navBar;
     protected Bs\Carousel$carousel;
@@ -20,15 +30,17 @@ class SampleForm extends QForm
 
     protected Bs\Dropdown $lstPlain;
 
-    /**
-     * Initializes and configures various components of the form.
-     *
-     * The method orchestrates the creation of multiple key UI components,
-     * including a navigation bar, carousel, accordion, radio list, and dropdown menus.
-     * These components are set up to enhance the user interface of the application.
-     *
-     * @return void
-     */
+        /**
+         * Initializes and configures various components of the form.
+         *
+         * The method orchestrates the creation of multiple key UI components,
+         * including a navigation bar, carousel, accordion, radio list, and dropdown menus.
+         * These components are set up to enhance the user interface of the application.
+         *
+         * @return void
+         * @throws Caller
+         * @throws InvalidCast
+         */
     protected function formCreate(): void
     {
         $this->navBar_Create();
@@ -45,6 +57,8 @@ class SampleForm extends QForm
      * It dynamically populates dropdown menus with links to list and edit forms, scanning files in a specific directory.
      *
      * @return void
+     * @throws Caller
+     * @throws InvalidCast
      */
     protected function navBar_Create(): void
     {
@@ -73,7 +87,7 @@ class SampleForm extends QForm
             }
         }
 
-        $objList->addMenuItem($objListMenu);;
+        $objList->addMenuItem($objListMenu);
         $objList->addMenuItem($objEditMenu);
 
         /*
@@ -89,6 +103,7 @@ class SampleForm extends QForm
      * Initializes and creates the carousel component, adding predefined items to it.
      *
      * @return void
+     * @throws Caller
      */
     protected function carousel_Create(): void
     {
@@ -102,6 +117,7 @@ class SampleForm extends QForm
      * Initializes and creates the accordion component.
      *
      * @return void
+     * @throws Caller
      */
     protected function accordion_Create(): void
     {
@@ -115,6 +131,7 @@ class SampleForm extends QForm
      * with their associated Address data expanded.
      *
      * @return void
+     * @throws Caller
      */
     protected function accordion_Bind(): void
     {
@@ -150,14 +167,17 @@ class SampleForm extends QForm
      * Creates and initializes radio list components with specified items and configurations.
      *
      * @return void
+     * @throws Caller
      */
     protected function radioList_Create(): void
     {
         $this->lstRadio1 = new Bs\RadioList($this);
         $this->lstRadio1->addItems(["yes" => "Yes", "no" => "No"]);
+        $this->lstRadio1->SelectedValue = "yes";
 
         $this->lstRadio2 = new Bs\RadioList($this);
         $this->lstRadio2->addItems(["yes" => "Yes", "no" => "No"]);
+        $this->lstRadio2->SelectedValue = "yes";
         $this->lstRadio2->ButtonMode = RadioButtonList::BUTTON_MODE_SET;
         $this->lstRadio2->ButtonStyle = Bs\Bootstrap::BUTTON_PRIMARY;
 
@@ -167,6 +187,8 @@ class SampleForm extends QForm
      * Creates and initializes dropdown components with specified items and configurations.
      *
      * @return void
+     * @throws Caller
+     * @throws InvalidCast
      */
     protected function dropdowns_Create(): void
     {

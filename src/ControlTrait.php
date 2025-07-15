@@ -12,7 +12,6 @@ namespace QCubed\Bootstrap;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
 use QCubed\Html;
-use QCubed\HtmlAttributeManagerBase;
 use QCubed\Project\Control\TextBox;
 use QCubed\Project\Control\Checkbox;
 use QCubed\Project\Control\ListBox;
@@ -25,7 +24,7 @@ use QCubed\Type;
  * Class ControlTrait
  *
  * Base bootstrap control trait. The preferred method of adding bootstrap functionality is to make your Control class
- * inherit from the Control class in Control.class.php. Alternatively you can use this trait to make a control a
+ * inherit from the Control class in Control.class.php. Alternatively, you can use this trait to make a control a
  * bootstrap control, but you have to be careful of method collisions. The best way to do this is probably to
  * use it in a derived class of the base class.
  *
@@ -91,9 +90,10 @@ trait ControlTrait
      * @param int $intColumns
      * @param int $intOffset
      * @param int $intPush
-     * @return mixed
+     *
+     * @return bool
      */
-    public function addColumnClass(string $strDeviceSize, int $intColumns = 0, int $intOffset = 0, int $intPush = 0): mixed
+    public function addColumnClass(string $strDeviceSize, int $intColumns = 0, int $intOffset = 0, int $intPush = 0): bool
     {
         return ($this->addCssClass(Bootstrap::createColumnClass($strDeviceSize, $intColumns, $intOffset, $intPush)));
     }
@@ -107,7 +107,7 @@ trait ControlTrait
      * @param int $intOffset
      * @param int $intPush
      */
-    public function addHorizontalColumnClass(string $strDeviceSize, int $intColumns = 0, int $intOffset = 0, int $intPush = 0): mixed
+    public function addHorizontalColumnClass(string $strDeviceSize, int $intColumns = 0, int $intOffset = 0, int $intPush = 0): void
     {
         $strClass = Bootstrap::createColumnClass($strDeviceSize, $intColumns, $intOffset, $intPush);
         $blnChanged = Html::addClass($this->strHorizontalClass, $strClass);
@@ -115,7 +115,6 @@ trait ControlTrait
             $this->markAsModified();
         }
     }
-
 
     /**
      * Removes column-related CSS classes from a given string based on the specified device size.
@@ -133,7 +132,7 @@ trait ControlTrait
         $aRet = array();
         if ($strHaystack) {
             foreach (explode(' ', $strHaystack) as $strClass) {
-                if (strpos($strClass, $strTest) !== 0) {
+                if (!str_starts_with($strClass, $strTest)) {
                     $aRet[] = $strClass;
                 }
             }
@@ -156,11 +155,10 @@ trait ControlTrait
         $intCtrlCols = 12 - $intColumns;
         if ($this->Name) { // label next to control
             $this->addLabelClass(Bootstrap::createColumnClass($strDeviceSize, $intColumns));
-            $this->addHorizontalColumnClass($strDeviceSize, $intCtrlCols);
-        } else { // no label, so shift control to other column
+        } else { // no label, so shift control to another column
             $this->addHorizontalColumnClass($strDeviceSize, 0, $intColumns);
-            $this->addHorizontalColumnClass($strDeviceSize, $intCtrlCols);
         }
+        $this->addHorizontalColumnClass($strDeviceSize, $intCtrlCols);
     }
 
     /**
@@ -173,6 +171,7 @@ trait ControlTrait
      *
      * @return string|null The rendered HTML as a string if $blnDisplayOutput is false, or null if the output is
      *                     sent directly.
+     * @throws Caller
      */
     public function renderFormGroup(bool $blnDisplayOutput = true): ?string
     {
@@ -181,7 +180,7 @@ trait ControlTrait
             $this->addCssClass(Bootstrap::FORM_CONTROL); // make sure certain controls get a form control class
         }
 
-        $this->blnUseWrapper = true;    // always use wrapper, because its part of the form group
+        $this->blnUseWrapper = true;    // always use wrapper because it's part of the form group
         $this->getWrapperStyler()->addCssClass(Bootstrap::FORM_GROUP);
 
         $this->renderHelper(func_get_args(), __FUNCTION__);
@@ -233,7 +232,7 @@ trait ControlTrait
 
         /* Checkboxes and RadioButtons present a special problem. Bootstrap really wants these to have a label drawn after
            the checkbox, which leaves us wondering what to do with the Name. So here, we try to use the Name as the label
-           if there is no Text, otherwise it will let the Text handle the label tag, and instead draw a Span for the name.
+           if there is no Text, otherwise it will let the Text handle the label tag and instead draw a Span for the name.
         */
         if ($this instanceof Checkbox || $this instanceof RadioButton) {
             if ($this->Text) {
@@ -280,10 +279,14 @@ trait ControlTrait
 
 
     /**
-     * Returns the attributes for the control.
-     * @param bool $blnIncludeCustom
-     * @param bool $blnIncludeAction
-     * @return string
+     * Renders the HTML attributes for the current object, allowing for optional
+     * overrides of attributes and styles. Updates specific accessibility attributes
+     * based on the presence of validation errors, warnings, or instructions.
+     *
+     * @param array|null $attributeOverrides Optional associative array to override default HTML attributes.
+     * @param array|null $styleOverrides Optional associative array to override default CSS styles.
+     *
+     * @return string The rendered string of HTML attributes, including any specified overrides.
      */
     public function renderHtmlAttributes(?array $attributeOverrides = null, ?array $styleOverrides = null): string
     {
@@ -403,7 +406,7 @@ trait ControlTrait
      * must be implemented by a subclass to define the specific behavior or styling
      * wrapper to be returned.
      *
-     * @return mixed The wrapper styler object or configuration used for styling purposes.
+     * @return null|TagStyler The wrapper styler object or configuration used for styling purposes.
      */
     abstract public function getWrapperStyler(): ?TagStyler;
 
@@ -418,16 +421,14 @@ trait ControlTrait
      * @param mixed $mixValue The value to set for the property.
      *
      * @return void
+     * @throws Caller
+     * @throws InvalidCast
      */
     public function __set(string $strName, mixed $mixValue): void
     {
         switch ($strName) {
-            case 'ValidationError':
-                parent::__set($strName, $mixValue);
-                $this->reinforceValidationState();
-                break;
-
             case 'Warning':
+            case 'ValidationError':
                 parent::__set($strName, $mixValue);
                 $this->reinforceValidationState();
                 break;

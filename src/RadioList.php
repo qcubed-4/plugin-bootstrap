@@ -9,12 +9,13 @@
 
 namespace QCubed\Bootstrap;
 
+use QCubed\Bootstrap as Bs;
 use QCubed\Control\ListControl;
 use QCubed\Control\RadioButtonList;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
+use QCubed\Project\Application;
 use QCubed\Html;
-use QCubed\TagStyler;
 use QCubed\Type;
 
 /**
@@ -23,26 +24,38 @@ use QCubed\Type;
  * Bootstrap specific drawing of a \QCubed\Control\RadioButtonList
  *
  * Modes:
- * 	ButtonModeNone	Display as standard radio buttons using table styling if specified
- *  ButtonModeJq	Display as separate radio buttons styled with bootstrap styling
- *  ButtonModeSet	Display as a button group
- *  ButtonModeList	Display as standard radio buttons with no structure
+ * 	ButtonModeNone Display as standard radio buttons using table styling if specified
+ *  ButtonModeJq Display as separate radio buttons styled with bootstrap styling
+ *  ButtonModeSet Display as a button group
+ *  ButtonModeList Display as standard radio buttons with no structure
+ *
+ * @property string $ButtonGroupClass Allows you to set the theme.
+ * @property string $GroupName assigns the radio button into a radio button group (optional) so that no more than one radio in that group may be selected at a time.
+ * @property boolean $Checked specifies whether or not the radio is selected
  *
  * @property-write string ButtonStyle Bootstrap::ButtonPrimary, ButtonSuccess, etc.
  * @package QCubed\Bootstrap
  */
 class RadioList extends RadioButtonList
 {
-    protected bool $blnWrapLabel = true;
     protected string $strButtonGroupClass = "radio";
-    protected string $strButtonStyle = Bootstrap::BUTTON_DEFAULT;
+    protected bool $blnChecked;
+    protected string $strButtonStyle = Bs\Bootstrap::BUTTON_DEFAULT;
+    /**
+     * Group to which this radio button belongs
+     * Groups determine the 'radio' behavior wherein you can select only one option out of all buttons in that group
+     * @var null|string Name of the group
+     */
+    protected ?string $strGroupName = null;
 
     /**
-     * Used by drawing routines to render the attributes associated with this control.
+     * Renders the HTML attributes for the control, with optional overrides for attributes and styles.
+     * When rendered in button mode, it adds a toggle and class attributes specific to the button group styling.
      *
-     * @param null|array $attributeOverrides
-     * @param null|array $styleOverrides
-     * @return string
+     * @param array|null $attributeOverrides Optional overrides for the HTML attributes.
+     * @param array|null $styleOverrides Optional overrides for the inline styles.
+     *
+     * @return string The rendered HTML attributes as a string.
      */
     public function renderHtmlAttributes(?array $attributeOverrides = null, ?array $styleOverrides = null): string
     {
@@ -55,70 +68,27 @@ class RadioList extends RadioButtonList
     }
 
     /**
-     * Retrieves the ending JavaScript script for the control, bypassing the default handling
-     * specific to the \QCubed\Control\RadioButtonList.
+     * Retrieves the end script for the control bypassing the RadioButtonList-specific implementation.
      *
-     * @return string The ending script for the control.
+     * @return string The end script for the control.
      */
     public function getEndScript(): string
     {
-        $strScript = ListControl::getEndScript();    // bypass the \QCubed\Control\RadioButtonList end script
-        return $strScript;
+        // bypass the \QCubed\Control\RadioButtonList end script
+        return ListControl::getEndScript();
     }
 
     /**
-     * Renders a button set by iterating through the available items, generating their HTML,
-     * and wrapping the result inside a container element.
-     *
-     * @return string The HTML string representing the rendered button set.
-     */
-    public function renderButtonSet(): string
-    {
-        $count = $this->ItemCount;
-        $strToReturn = '';
-        for ($intIndex = 0; $intIndex < $count; $intIndex++) {
-            $strToReturn .= $this->getItemHtml($this->getItem($intIndex), $intIndex, $this->getHtmlAttribute('tabindex'), $this->blnWrapLabel) . "\n";
-        }
-        $strToReturn = $this->renderTag('div', ['id'=>$this->strControlId], null, $strToReturn);
-        return $strToReturn;
-    }
-
-    /**
-     * Overrides the attributes of an individual item and its corresponding label in the control.
-     *
-     * @param mixed $objItem The item whose attributes are being modified. It contains the properties of the item, such as 'Selected'.
-     * @param TagStyler $objItemAttributes The object handling the style and attributes of the item.
-     * @param TagStyler $objLabelAttributes The object handling the style and attributes of the label associated with the item.
-     *
-     * @return void
-     */
-    protected function overrideItemAttributes(mixed $objItem, TagStyler $objItemAttributes, TagStyler $objLabelAttributes): void
-    {
-        if ($objItem->Selected) {
-            $objLabelAttributes->addCssClass("active");
-        }
-    }
-
-    /**
-     * Updates the selection state of the control and marks it as modified.
-     *
-     * @return void
-     */
-    protected function refreshSelection(): void
-    {
-        $this->markAsModified();
-    }
-
-    /**
-     * Sets the value of a property dynamically based on the property name.
+     * Magic method to set the value of a property dynamically based on its name. Handles specific property cases
+     * like appearance settings, group configuration, button modes, and more.
      *
      * @param string $strName The name of the property to set.
-     * @param mixed $mixValue The value to assign to the property.
+     * @param mixed $mixValue The value to be set for the property.
      *
      * @return void
      *
-     * @throws InvalidCast Thrown when the provided value cannot be cast to the appropriate type.
-     * @throws Caller Thrown when attempting to set an invalid or inaccessible property.
+     * @throws InvalidCast If the provided value cannot be cast to the expected type.
+     * @throws Caller If the property is not recognized and cannot be handled by the parent class.
      */
     public function __set(string $strName, mixed $mixValue): void
     {
@@ -134,7 +104,6 @@ class RadioList extends RadioButtonList
                     throw $objExc;
                 }
                 break;
-
             case "ButtonMode":    // inherited
                 try {
                     if ($mixValue === self::BUTTON_MODE_SET) {
@@ -147,10 +116,67 @@ class RadioList extends RadioButtonList
                     throw $objExc;
                 }
                 break;
+            case "GroupName":
+                try {
+                    $strGroupName = Type::cast($mixValue, Type::STRING);
+                    if ($this->strGroupName != $strGroupName) {
+                        $this->strGroupName = $strGroupName;
+                        $this->blnModified = true;
+                    }
+                    break;
+                } catch (InvalidCast $objExc) {
+                    $objExc->incrementOffset();
+                    throw $objExc;
+                }
+            case "Checked":
+                try {
+                    $val = Type::cast($mixValue, Type::BOOLEAN);
+                    if ($val != $this->blnChecked) {
+                        $this->blnChecked = $val;
+                        if ($this->GroupName && $val) {
+                            Application::executeJsFunction('qcubed.setRadioInGroup', $this->strControlId);
+                        } else {
+                            $this->addAttributeScript('prop', 'checked', $val); // just set the one radio
+                        }
+                    }
+                    break;
+                } catch (InvalidCast $objExc) {
+                    $objExc->incrementOffset();
+                    throw $objExc;
+                }
+            case "ButtonGroupClass":
+                $this->strButtonGroupClass = Type::cast($mixValue, Type::STRING);
+                break;
 
             default:
                 try {
                     parent::__set($strName, $mixValue);
+                } catch (Caller $objExc) {
+                    $objExc->incrementOffset();
+                    throw $objExc;
+                }
+        }
+    }
+
+    /**
+     * Magic method to retrieve the value of a property.
+     *
+     * @param string $strName The name of the property to retrieve.
+     *
+     * @return mixed The value of the requested property.
+     *               Returns the value of "GroupName" or "Checked" if accessed directly.
+     *               Falls back to the parent::__get method for other properties.
+     * @throws Caller If the property does not exist or is inaccessible.
+     */
+    public function __get(string $strName): mixed
+    {
+        switch ($strName) {
+            case "GroupName": return $this->strGroupName;
+            case "Checked": return $this->blnChecked;
+
+            default:
+                try {
+                    return parent::__get($strName);
                 } catch (Caller $objExc) {
                     $objExc->incrementOffset();
                     throw $objExc;

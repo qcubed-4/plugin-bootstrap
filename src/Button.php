@@ -9,6 +9,8 @@
 
 namespace QCubed\Bootstrap;
 
+use QCubed\ApplicationBase;
+use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
 use QCubed\Project\Application;
 use QCubed\Type;
@@ -44,6 +46,8 @@ class Button extends \QCubed\Project\Control\Button
      * @param string $strStyleClass The CSS class to be assigned.
      *
      * @return void
+     * @throws Caller
+     * @throws InvalidCast
      */
     public function setStyleClass(string $strStyleClass): void
     {
@@ -59,6 +63,8 @@ class Button extends \QCubed\Project\Control\Button
      * @param string $strSizeClass The new size class to be applied to the button.
      *
      * @return void
+     * @throws Caller
+     * @throws InvalidCast
      */
     public function setSizeClass(string $strSizeClass): void
     {
@@ -71,12 +77,13 @@ class Button extends \QCubed\Project\Control\Button
      * Initializes a jQuery widget for the control, particularly setting it up as a tooltip if applicable.
      *
      * @return void
+     * @throws Caller
      */
     protected function makeJqWidget(): void
     {
         if ($this->blnTip) {
             $this->setDataAttribute('toggle', 'tooltip');
-            Application::executeControlCommand($this->ControlId, "bootstrapTooltip", Application::PRIORITY_HIGH);
+            Application::executeControlCommand($this->ControlId, "bootstrapTooltip", ApplicationBase::PRIORITY_HIGH);
         }
     }
 
@@ -87,6 +94,8 @@ class Button extends \QCubed\Project\Control\Button
      * @param mixed $mixValue The value to assign to the property.
      *
      * @return void
+     * @throws Caller
+     * @throws InvalidCast
      */
     public function __set(string $strName, mixed $mixValue): void
     {

@@ -15,10 +15,11 @@ use QCubed\Control\FormBase;
 use QCubed\Control\Proxy;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
+use Exception;
+use Throwable;
 use QCubed\Event\Click;
 use QCubed\Action\AjaxControl;
 use QCubed\Action\ActionBase;
-use QCubed as Q;
 
 /**
  * Class ListGroup
@@ -32,7 +33,7 @@ use QCubed as Q;
  */
 class ListGroup extends DataRepeater
 {
-    /** @var Proxy */
+    /** @var Proxy|null */
     protected Proxy|null $prxButton = null;
 
     protected string|int|null $strSelectedItemId = null;
@@ -46,6 +47,7 @@ class ListGroup extends DataRepeater
      * @param string|null $strControlId Optional control ID for uniquely identifying this control.
      *
      * @return void
+     * @throws Caller
      */
     public function __construct(ControlBase|FormBase $objParentObject, ?string $strControlId = null)
     {
@@ -65,6 +67,7 @@ class ListGroup extends DataRepeater
      * Configures the necessary setup for the component, including event bindings.
      *
      * @return void
+     * @throws Caller
      */
     protected function setup(): void
     {
@@ -79,7 +82,7 @@ class ListGroup extends DataRepeater
      *
      * @return void
      */
-    public function addClickAction(ActionBase $action)
+    public function addClickAction(ActionBase $action): void
     {
         $this->prxButton->addAction(new Click(), $action);
     }
@@ -127,9 +130,7 @@ class ListGroup extends DataRepeater
         if ($this->blnSaveState && $this->strSelectedItemId !== null && $this->strSelectedItemId == $strId) {
             $attributes["class"] .= " active";
         }
-        $strLink = $this->prxButton->renderAsLink($strLabel, $strActionParam, $attributes, "a", false);
-
-        return $strLink;
+        return $this->prxButton->renderAsLink($strLabel, $strActionParam, $attributes, "a", false);
     }
 
     /**
@@ -154,7 +155,7 @@ class ListGroup extends DataRepeater
      *  func($objItem, $intCurrentItemIndex)
      * The callback will be give the current item from the data source, and the item's index visually.
      * The function should return a key/value array with the following possible items:
-     *	html - the html to display as the innerHtml of the row.
+     *	HTML - the HTML to display as the innerHtml of the row.
      *  id - the id for the row tag
      *  attributes - Other attributes to put in the row tag.
      *
@@ -176,6 +177,9 @@ class ListGroup extends DataRepeater
      * @param mixed $mixValue The value to assign to the property. May vary depending on the property type.
      *
      * @return void
+     * @throws Caller
+     * @throws InvalidCast
+     * @throws Throwable
      */
     public function __set(string $strName, mixed $mixValue): void
     {

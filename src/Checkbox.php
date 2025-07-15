@@ -9,10 +9,12 @@
 
 namespace QCubed\Bootstrap;
 
-use QCubed\Project\Control\Checkbox as CheckboxBase;;
+use QCubed\Project\Control\Checkbox as CheckboxBase;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
 use QCubed\Html;
+use QCubed\Type;
+use Throwable;
 
 /**
  * Class Checkbox
@@ -59,14 +61,17 @@ class Checkbox extends CheckboxBase
     /**
      * Sets the value of a property by dynamically handling the specified property name.
      *
-     * @param string $strText The name of the property to set.
+     * @param string $strName The name of the property to set.
      * @param mixed $mixValue The value to assign to the property.
      *
      * @return void
+     * @throws Caller
+     * @throws InvalidCast
+     * @throws Throwable
      */
-    public function __set(string $strText, mixed $mixValue): void
+    public function __set(string $strName, mixed $mixValue): void
     {
-        switch ($strText) {
+        switch ($strName) {
             case "Inline":
                 try {
                     $this->blnInline = Type::cast($mixValue, Type::BOOLEAN);
@@ -78,7 +83,7 @@ class Checkbox extends CheckboxBase
 
             default:
                 try {
-                    parent::__set($strText, $mixValue);
+                    parent::__set($strName, $mixValue);
                 } catch (Caller $objExc) {
                     $objExc->incrementOffset();
                     throw $objExc;
